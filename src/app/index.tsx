@@ -2,7 +2,9 @@
 // Remplacé par la galerie à l'étape 3.
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+
+import { Avatar } from '@/components/Avatar';
 
 import { listFriends } from '@/db/queries';
 import { daysSince, relativeDay, splitByStatus, todayISO } from '@/domain/friendship';
@@ -27,6 +29,13 @@ export default function Index() {
         {friends.length} personnes · {toFollowUp.length} à relancer
       </Text>
       <Text style={styles.section}>À relancer</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {friends.map((f) => (
+          <View key={f.id} style={{ backgroundColor: '#FFE1C7', borderWidth: 2 }}>
+            <Avatar seed={f.id} settings={f.avatar} size={100} />
+          </View>
+        ))}
+      </View>
       {toFollowUp.map((f) => (
         <Text key={f.id}>{line(f)}</Text>
       ))}
