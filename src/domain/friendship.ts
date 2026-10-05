@@ -52,3 +52,31 @@ export function splitByStatus<T extends FriendWithLastContact>(friends: T[], tod
   fine.sort((a, b) => key(b).localeCompare(key(a)));
   return { toFollowUp, fine };
 }
+
+export const CHANNEL_LABELS = {
+  appel: 'Appel',
+  message: 'Message',
+  cafe: 'Café',
+  autre: 'Autre',
+} as const;
+
+/** Rythmes proposés dans la fiche, en jours. */
+export const RHYTHM_CHOICES = [7, 14, 21, 28, 42, 56] as const;
+
+/** « toutes les semaines », « toutes les 3 semaines », « tous les 10 jours ». */
+export function rhythmLabel(days: number): string {
+  if (days % 7 === 0) {
+    const weeks = days / 7;
+    return weeks === 1 ? 'toutes les semaines' : `toutes les ${weeks} semaines`;
+  }
+  return days === 1 ? 'tous les jours' : `tous les ${days} jours`;
+}
+
+const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+
+/** « 12 sept. », avec l'année si ce n'est pas l'année en cours : « 3 mars 2025 ». */
+export function shortDate(iso: string, today: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const label = `${d} ${MONTHS[m - 1]}`;
+  return iso.slice(0, 4) === today.slice(0, 4) ? label : `${label} ${y}`;
+}

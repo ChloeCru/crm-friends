@@ -29,8 +29,8 @@ export const BEARD: Choice<AvatarSettings['beardVariant']>[] = [
 export const EYES: Choice<AvatarSettings['eyesVariant']>[] = [
   { value: 'happy', label: 'Rieurs' },
   { value: 'wide', label: 'Grands' },
-  { value: 'humble', label: 'Doux' },
-  { value: 'bow', label: 'Fermés' },
+  { value: 'humble', label: 'Paisibles' },
+  { value: 'bow', label: 'Plissés' },
   { value: 'wink', label: "Clin d'œil" },
 ];
 

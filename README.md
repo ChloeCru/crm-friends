@@ -13,6 +13,14 @@ npx expo start      # puis scanner le QR code avec l'app Expo Go sur l'iPhone
 
 En développement, une base vide est remplie avec des amis d'exemple (`src/db/seed.ts`).
 
+## Organisation
+
+- `src/app/` : écrans (Expo Router) — galerie, rappels, réglages (onglets), fiche, éditeur d'avatar, modification.
+- `src/domain/` : types et valeurs calculées (dernier contact, « à relancer », libellés), testés sans React Native.
+- `src/db/` : schéma SQLite, requêtes, amis d'exemple.
+- `src/avatar/` : options DiceBear Toon Head et rendu SVG.
+- `src/ui/`, `src/components/` : thème « stickers » et composants.
+
 ## Vérifier
 
 ```bash

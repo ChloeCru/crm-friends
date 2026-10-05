@@ -49,4 +49,8 @@ export type Contact = {
   createdAt: string;
 };
 
-export type FriendWithLastContact = Friend & { lastContact: string | null };
+export type FriendWithLastContact = Friend & {
+  lastContact: string | null;
+  /** Rang de création : choisit la couleur de vignette, stable pour un ami. */
+  colorIndex: number;
+};

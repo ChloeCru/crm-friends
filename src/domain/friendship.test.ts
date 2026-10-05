@@ -7,6 +7,8 @@ import {
   daysSince,
   needsFollowUp,
   relativeDay,
+  rhythmLabel,
+  shortDate,
   splitByStatus,
   todayISO,
 } from './friendship.ts';
@@ -58,4 +60,15 @@ test('splitByStatus trie chaque bloc dans le bon sens', () => {
   );
   assert.deepEqual(toFollowUp.map((x) => x.name), ['Nouveau', 'Zoé', 'Hugo', 'Inès']);
   assert.deepEqual(fine.map((x) => x.name), ['Tom', 'Malo']);
+});
+
+test('rhythmLabel', () => {
+  assert.equal(rhythmLabel(7), 'toutes les semaines');
+  assert.equal(rhythmLabel(21), 'toutes les 3 semaines');
+  assert.equal(rhythmLabel(10), 'tous les 10 jours');
+});
+
+test('shortDate', () => {
+  assert.equal(shortDate('2026-09-12', TODAY), '12 sept.');
+  assert.equal(shortDate('2025-03-03', TODAY), '3 mars 2025');
 });

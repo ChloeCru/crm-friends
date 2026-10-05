@@ -3,6 +3,8 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { AvatarSettings, Channel, Contact, Friend, FriendWithLastContact } from '@/domain/types';
 
+type SummaryRow = FriendRow & { last_contact: string | null; color_index: number };
+
 type FriendRow = {
   id: string;
   name: string;
@@ -35,6 +37,10 @@ function toFriend(row: FriendRow): Friend {
   };
 }
 
+function toSummary(row: SummaryRow): FriendWithLastContact {
+  return { ...toFriend(row), lastContact: row.last_contact, colorIndex: row.color_index };
+}
+
 function toContact(row: ContactRow): Contact {
   return {
     id: row.id,
@@ -46,21 +52,25 @@ function toContact(row: ContactRow): Contact {
 }
 
 export async function listFriends(db: SQLiteDatabase): Promise<FriendWithLastContact[]> {
-  const rows = await db.getAllAsync<FriendRow & { last_contact: string | null }>(`
-    SELECT f.*, (SELECT MAX(c.date) FROM contact c WHERE c.friend_id = f.id) AS last_contact
+  const rows = await db.getAllAsync<SummaryRow>(`
+    SELECT f.*,
+      (SELECT MAX(c.date) FROM contact c WHERE c.friend_id = f.id) AS last_contact,
+      (SELECT COUNT(*) FROM friend g WHERE g.rowid < f.rowid) AS color_index
     FROM friend f
     ORDER BY f.name COLLATE NOCASE
   `);
-  return rows.map((r) => ({ ...toFriend(r), lastContact: r.last_contact }));
+  return rows.map(toSummary);
 }
 
 export async function getFriend(db: SQLiteDatabase, id: string): Promise<FriendWithLastContact | null> {
-  const row = await db.getFirstAsync<FriendRow & { last_contact: string | null }>(
-    `SELECT f.*, (SELECT MAX(c.date) FROM contact c WHERE c.friend_id = f.id) AS last_contact
-     FROM friend f WHERE f.id = ?`,
+  const row = await db.getFirstAsync<SummaryRow>(
+    `SELECT f.*,
+      (SELECT MAX(c.date) FROM contact c WHERE c.friend_id = f.id) AS last_contact,
+      (SELECT COUNT(*) FROM friend g WHERE g.rowid < f.rowid) AS color_index
+    FROM friend f WHERE f.id = ?`,
     id,
   );
-  return row ? { ...toFriend(row), lastContact: row.last_contact } : null;
+  return row ? toSummary(row) : null;
 }
 
 /** Contacts d'un ami, les plus récents en premier. */
@@ -106,4 +116,36 @@ export async function insertContact(
     new Date().toISOString(),
   );
   return id;
+}
+
+export type FriendPatch = Partial<Pick<Friend, 'name' | 'label' | 'rhythmDays' | 'avatar' | 'notes' | 'channels'>>;
+
+const COLUMNS: Record<keyof FriendPatch, string> = {
+  name: 'name',
+  label: 'label',
+  rhythmDays: 'rhythm_days',
+  avatar: 'avatar',
+  notes: 'notes',
+  channels: 'channels',
+};
+
+export async function updateFriend(db: SQLiteDatabase, id: string, patch: FriendPatch) {
+  const keys = Object.keys(patch) as (keyof FriendPatch)[];
+  if (keys.length === 0) return;
+  const values = keys.map((k) => {
+    const v = patch[k];
+    if (k === 'avatar' || k === 'channels') return JSON.stringify(v);
+    if (k === 'name') return (v as string).trim();
+    return v as string | number;
+  });
+  await db.runAsync(
+    `UPDATE friend SET ${keys.map((k) => `${COLUMNS[k]} = ?`).join(', ')} WHERE id = ?`,
+    ...values,
+    id,
+  );
+}
+
+/** Supprime l'ami et, par cascade, ses contacts. */
+export async function deleteFriend(db: SQLiteDatabase, id: string) {
+  await db.runAsync('DELETE FROM friend WHERE id = ?', id);
 }
