@@ -1,6 +1,6 @@
 # Brief — CRM d'amis (première version)
 
-Maquettes : https://claude.ai/artifact/31ph6UrHpgoMogSXJ1LkxY (Galerie, Fiche, Éditeur, 390 × 844).
+Maquettes : trois écrans (Galerie, Fiche, Éditeur), au format 390 × 844.
 
 ## Le produit en une phrase
 
